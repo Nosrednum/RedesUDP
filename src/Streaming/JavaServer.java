@@ -29,6 +29,8 @@ public class JavaServer {
 	static final String ADDRESS="localhost";
 
 	public static void main(String[] args) throws Exception {
+
+		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Por favor indique la cantidad máxima de clientes");
 		@SuppressWarnings("unused")
