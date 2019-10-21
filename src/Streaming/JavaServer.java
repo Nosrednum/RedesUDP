@@ -39,7 +39,7 @@ public class JavaServer {
 
 	public JavaServer(int cantClientes) throws Exception {
 		JavaServer.cantidadClientes=cantClientes;
-		NativeLibrary.addSearchPath("libvlc", "./libs/vlc-3.0.8");
+		NativeLibrary.addSearchPath("libvlc", "C:\\Users\\Administrator\\Desktop");
 
 		JavaServer.inet = new InetAddress[cantidadClientes];
 		port = new int[cantidadClientes];
