@@ -6,21 +6,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 
 import UtilityPackage.FileCheckSumMD5;
 
 public class TcpProtocolThreadB extends Thread {
 
-	private Socket sock = null;
+	private DatagramSocket sock = null;
 
 	public String FILE_TO_SEND = "./data/";
-	public int size = 1500;
+	public int size = 3000, port;
 
-	public TcpProtocolThreadB(String archivo, int tamanio, Socket socket) {
+	public TcpProtocolThreadB(String archivo, int tamanio, DatagramSocket socket, int pport) {
 		this.sock = socket;
 		this.size = tamanio;
 		this.FILE_TO_SEND += archivo;
+		this.port = pport;
 	}
 
 	public void run() {
@@ -33,25 +37,34 @@ public class TcpProtocolThreadB extends Thread {
 			System.out.println("Accepted connection : " + sock);
 			// send file
 			File myFile = new File(FILE_TO_SEND);
-			pw = new PrintWriter(sock.getOutputStream());
-			//			bf = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+
 			pw.println(FileCheckSumMD5.checksum(myFile));
-			//			System.out.println("paso???");
-			//			System.out.println(bf.readLine());
 			pw.flush();
-			byte[] mybytearray = new byte[(int) myFile.length()];
+			byte[] send, mybytearray = new byte[(int) myFile.length()];
 			fis = new FileInputStream(myFile);
 			bis = new BufferedInputStream(fis);
-			bis.read(mybytearray, 0, mybytearray.length);
-			os = sock.getOutputStream();
+			bis.read(mybytearray, 0, mybytearray.length); //carga del archivo en bytes
 			System.out.println("Sending " + FILE_TO_SEND + "(" + mybytearray.length + " bytes)");
 			int i = 0;
+			DatagramPacket dato=null;
+			send = new byte[size];
+			dato = new DatagramPacket(
+					send, // El array de bytes
+					size, // Su longitud
+					InetAddress.getByName("localhost"),  // Destinatario
+					port);   // Puerto del destinatario
 			while (i + size < mybytearray.length) {
-				os.write(mybytearray, i, (size));
+				for(int j=i;j<size;++j)
+					send[j-i]=mybytearray[j];//reconfigura el arreglo
+				dato.setData(send);//altera el paquete
+				sock.send(dato);//envía el paquete
 				i += size;
 			}
-			os.write(mybytearray, i, mybytearray.length - i);
-			os.flush();
+			send=new byte[mybytearray.length-i];//envío de los últimos bytes
+			for(int j=i;j<mybytearray.length;++j)
+				send[j-i]=mybytearray[j];
+			dato.setData(send);
+			sock.send(dato);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

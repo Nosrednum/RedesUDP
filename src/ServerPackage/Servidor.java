@@ -1,5 +1,6 @@
 package ServerPackage;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.util.Scanner;
 
@@ -11,7 +12,7 @@ public class Servidor {
 	public static String archivo;
 
 	public static void main(String[] args) throws IOException {
-		ServerSocket servsuck = null;
+		DatagramSocket servsuck = null;
 		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
 		try {
@@ -32,14 +33,14 @@ public class Servidor {
 			System.out.println("Waiting for "+((mode)?cantidad+" ":"")+"connections in mode "+((mode)?"server":"client")+"...");
 			/*________________________________________________________*/
 
-			servsuck = new ServerSocket(SOCKET_PORT);
+			//			servsuck = new ServerSocket(SOCKET_PORT);
 			if (!mode)
 				while (true)
-					(new TcpProtocolThreadB(archivo,size, servsuck.accept())).start();
+					(new TcpProtocolThreadB(archivo,size, servsuck, SOCKET_PORT)).start();
 			else {
 				TcpProtocolThreadB[] hilos = new TcpProtocolThreadB[cantidad];
 				while (true) {
-					hilos[conectados++]=new TcpProtocolThreadB(archivo, size, servsuck.accept());
+					hilos[conectados++]=new TcpProtocolThreadB(archivo, size, servsuck, SOCKET_PORT);
 					System.out.println("hay "+conectados+" conectados");
 					if (conectados == cantidad) {
 						for (TcpProtocolThreadB t : hilos)
@@ -49,7 +50,7 @@ public class Servidor {
 				}
 			}
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println("Could not listen on port " + SOCKET_PORT);
 			System.exit(-1);
 		} finally {

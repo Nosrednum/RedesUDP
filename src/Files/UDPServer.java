@@ -1,35 +1,33 @@
 package Files;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.security.MessageDigest;
-import java.util.Properties;
 
 public class UDPServer 
 {
-
 	String checkSum;
 	DatagramSocket serverSocket;
 	DatagramPacket receivePacket, sendpacket;
 	private OutputStream ouStream = null;
+	static String RUTA="localhost";
+	static int PORT=5432;
+
+	public static void main(String[] args) {
+		UDPServer c = new UDPServer();
+		while(true)
+			c.comunicar();
+	}
 
 	public void comunicar() 
 	{
 		try 
 		{
-			String ruta = "RUTA";
-
-			FileReader fr = new FileReader("server.properties");
-			Properties prop = new Properties();
-			prop.load(fr);
-
-			int port = Integer.parseInt(prop.getProperty("port"));
-			serverSocket = new DatagramSocket(port);
+			serverSocket = new DatagramSocket(5432);
 
 			byte[] receiveData = new byte[1024];
 
@@ -44,7 +42,7 @@ public class UDPServer
 			System.out.println("Esperando por for datagrama. . .\n");
 
 			//Integridad de los datos transferidos
-			checkSum = new String(digest(ruta));
+			checkSum = new String(digest(RUTA));
 
 			String msg = new String(receivePacket.getData());
 
@@ -69,7 +67,7 @@ public class UDPServer
 				sendpacket = new DatagramPacket(sendData, sendData.length);
 				serverSocket.send(sendpacket);
 				System.out.println("The file updated");
-				transferenciaArchivo(ruta);
+				transferenciaArchivo(RUTA);
 			}
 		} 
 		catch (Exception ex) {
@@ -110,7 +108,7 @@ public class UDPServer
 
 	public void transferenciaArchivo(String path) {
 		try {
-			FileWriter fw = new FileWriter(new File("text1.txt"));
+			FileWriter fw = new FileWriter(new File(RUTA));
 			byte[] receiveData = new byte[1000000];
 
 			while (receiveData != null) 

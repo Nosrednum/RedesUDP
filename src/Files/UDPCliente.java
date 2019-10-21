@@ -18,7 +18,13 @@ public class UDPCliente
 	DatagramSocket clientSocket;
 	DatagramPacket sendPacket, receivePacket;
 	private InputStream inStream = null;
-	String checkSumValue, RUTA="./data/vid1", SERVER="localhost";
+	String checkSumValue, RUTA="C:\\Users\\ander\\Desktop\\Vid1.mp4", SERVER="localhost";
+
+	public static void main(String[] args) {
+		UDPCliente c = new UDPCliente();
+		c.comunicar();
+	}
+
 	public void comunicar() 
 	{
 		byte[] sendData = new byte[1024];

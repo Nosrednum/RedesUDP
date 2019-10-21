@@ -1,9 +1,6 @@
 package ClientPackage;
 
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.Socket;
 
 import LoggerPackage.Info;
@@ -11,7 +8,7 @@ import LoggerPackage.Logger;
 import UtilityPackage.FileCheckSumMD5;
 import UtilityPackage.Timer;
 
-public class ClienteB {
+public class ClienteBi {
 
 	public final static int SOCKET_PORT = 13267;
 	public final static String SERVER = "18.208.134.243", RUTA = "./data2/";
@@ -25,35 +22,37 @@ public class ClienteB {
 		BufferedOutputStream bos = null;
 		PrintWriter pw = null;
 		BufferedReader bf=null;
-		DatagramSocket sock = null;
+		Socket sock = null;
 		String hash = new String();
 
 		try {
-			DatagramSocket socket = new DatagramSocket(
-					SOCKET_PORT,
-					InetAddress.getByName(SERVER));
+			sock = new Socket(SERVER, SOCKET_PORT);
 			System.out.println("Connecting...");
 			System.out.println("Connection established successfully");
-			int cantidad_iteraciones = 10, i;
+			bf = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			//			pw = new PrintWriter(sock.getOutputStream());
+			hash = bf.readLine();
+			//			pw.println("Estoy recibiendo el archivo...");
+			//			pw.flush();
+			sock.getOutputStream().flush();
 			t.start();
-			//			InputStream is = sock.getInputStream(); // recepción del socket
+			InputStream is = sock.getInputStream(); // recepción del socket
 			byte mybytearray[] = new byte[FILE_SIZE]; // representación byte a byte del archivo
 			fos = new FileOutputStream(RUTA + "fileof" + sock.getLocalPort() + ".mp4"); // Stream de envio de archivos
 			bos = new BufferedOutputStream(fos); // Stream de escritura del cliente
+			bytesRead = is.read(mybytearray, 0, mybytearray.length);
+			current = bytesRead;
+			int div =bytesRead;
 			/* Lectura del archivo */
-			DatagramPacket dato = new DatagramPacket(new byte[3000], 3000);
-			byte[] datos;
 			do {
-				sock.receive(dato);
-				datos = dato.getData();
-				for(i=0;i++<datos.length;)
-					mybytearray[current+i]=datos[i];
-				current += datos.length;
-			} while (cantidad_iteraciones-->0);
+				bytesRead = is.read(mybytearray, current, (mybytearray.length - current));
+				if (bytesRead >= 0)
+					current += bytesRead;
+			} while (bytesRead > -1);
 			bos.write(mybytearray, 0, current);
 			bos.flush();
-			int size =(int) (new File(RUTA + "fileof" + sock.getLocalPort() + ".mp4").length()), paqs =(int) size/3000 +1;
-			//			sock.getOutputStream().flush();
+			int size =(int) (new File(RUTA + "fileof" + sock.getLocalPort() + ".mp4").length()), paqs =(int) size/div +1;
+			sock.getOutputStream().flush();
 			boolean correcto = hash.equals(FileCheckSumMD5.checksum(RUTA + "fileof" + sock.getLocalPort() + ".mp4"));
 			System.out.println("El archivo fue recibido "+((correcto)?"correctamente":"incorrectamente"));
 			System.out.println("File downloaded (" + current + " bytes read)");
