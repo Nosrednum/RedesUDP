@@ -1,43 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Streaming;
 
-import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.Canvas;
-import java.awt.Graphics;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.*;
 
-/**
- *
- * @author imran
- */
 public class JavaClient {
 	public static DatagramSocket ds;
 
@@ -48,7 +19,6 @@ public class JavaClient {
 		init = "givedata".getBytes();
 
 		InetAddress addr = InetAddress.getLocalHost();
-		System.out.println(addr.getAddress());
 		DatagramPacket dp = new DatagramPacket(init,init.length,addr,4321);
 
 		ds.send(dp);
@@ -56,9 +26,7 @@ public class JavaClient {
 		DatagramPacket rcv = new DatagramPacket(init, init.length);
 
 		ds.receive(rcv);
-		System.out.println(new String(rcv.getData()));
 
-		System.out.println(ds.getPort());
 		Vidshow vd = new Vidshow();
 		vd.start();
 
@@ -130,10 +98,10 @@ class Vidshow extends Thread {
 	public void run() {
 
 		try {
-			System.out.println("got in");
+			//			System.out.println("got in");
 			do {
-				System.out.println("doing");
-				System.out.println("It is just the port?"+JavaClient.ds.getPort());
+				//				System.out.println("doing");
+				//				System.out.println("port: "+JavaClient.ds.getPort());
 
 				JavaClient.ds.receive(dp);
 				System.out.println("received");
@@ -142,11 +110,9 @@ class Vidshow extends Thread {
 				bf = ImageIO.read(bais);
 
 				if (bf != null) {
-					//jf.setVisible(true);
 					imc = new ImageIcon(bf);
 					jl.setIcon(imc);
-					//jp.add(jl);
-					//jf.add(jp);
+
 					Thread.sleep(15);
 				}
 				jf.revalidate();

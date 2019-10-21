@@ -2,6 +2,8 @@ package Streaming;
 
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
+
 import javax.imageio.ImageIO;
 
 import javax.swing.*;
@@ -18,6 +20,7 @@ import java.awt.event.*;
 public class JavaServer {
 
 	public static InetAddress[] inet;
+	public static int cantidadClientes, MAX_SIZE=62000;
 	public static int[] port;
 	public static int i;
 	static int count = 0;
@@ -26,22 +29,25 @@ public class JavaServer {
 	static final String ADDRESS="localhost";
 
 	public static void main(String[] args) throws Exception {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Por favor indique la cantidad máxima de clientes");
 		@SuppressWarnings("unused")
-		JavaServer jv = new JavaServer();
+		JavaServer jv = new JavaServer(sc.nextInt());
 	}
 
-	public JavaServer() throws Exception {
+	public JavaServer(int cantClientes) throws Exception {
+		JavaServer.cantidadClientes=cantClientes;
 		NativeLibrary.addSearchPath("libvlc", "C:\\Users\\ander\\Desktop\\vlc-3.0.8");
 
-		JavaServer.inet = new InetAddress[30];
-		port = new int[30];
+		JavaServer.inet = new InetAddress[cantidadClientes];
+		port = new int[cantidadClientes];
 
 		@SuppressWarnings("resource")
 		ServerSocket welcomeSocket = new ServerSocket(6782);
 		System.out.println("Conexion " + ((welcomeSocket.isClosed()) ? "cerrada!" : "abierta"));
-		Socket connectionSocket[] = new Socket[30];
-		inFromClient = new BufferedReader[30];
-		outToClient = new DataOutputStream[30];
+		Socket connectionSocket[] = new Socket[cantidadClientes];
+		inFromClient = new BufferedReader[cantidadClientes];
+		outToClient = new DataOutputStream[cantidadClientes];
 
 		/*
 		 * sockets UDP _________________________________________________________________
@@ -56,7 +62,7 @@ public class JavaServer {
 
 		i = 0;
 
-		SThread[] st = new SThread[30];
+		TextThread[] st = new TextThread[cantidadClientes];
 
 		while (true) {
 			//			System.out.println("Puerto del servidor: " + serv.getPort());
@@ -80,11 +86,11 @@ public class JavaServer {
 			outToClient[i] = new DataOutputStream(connectionSocket[i].getOutputStream());
 			outToClient[i].writeBytes("Connected: from Server\n");
 
-			st[i] = new SThread(i);
+			st[i] = new TextThread(i);
 			st[i].start();
 			sender.start();
 
-			if (i++ == 25)
+			if (i++ == cantidadClientes)
 				break;
 		}
 	}
@@ -236,14 +242,14 @@ class SubPlayer {
 	}
 }
 
-class SThread extends Thread {
+class TextThread extends Thread {
 
 	public static String clientSentence;
 	int threadId;
 	BufferedReader   inFromClient = JavaServer.inFromClient[threadId];
 	DataOutputStream outToClient[] = JavaServer.outToClient;
 
-	public SThread(int a) {threadId = a;}
+	public TextThread(int a) {threadId = a;}
 
 	public void run() {
 		while (true) {

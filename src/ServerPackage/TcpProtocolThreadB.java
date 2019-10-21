@@ -40,9 +40,9 @@ public class TcpProtocolThreadB extends Thread {
 
 			pw.println(FileCheckSumMD5.checksum(myFile));
 			pw.flush();
-			byte[] send, mybytearray = new byte[(int) myFile.length()];
 			fis = new FileInputStream(myFile);
 			bis = new BufferedInputStream(fis);
+			byte[] send, mybytearray = new byte[(int) myFile.length()];
 			bis.read(mybytearray, 0, mybytearray.length); //carga del archivo en bytes
 			System.out.println("Sending " + FILE_TO_SEND + "(" + mybytearray.length + " bytes)");
 			int i = 0;
